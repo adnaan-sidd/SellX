@@ -1,0 +1,246 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum SellerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ProductStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum FraudReportStatus {
+  OPEN
+  CLOSED
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum PaymentType {
+  LISTING_FEE
+}
+
+model User {
+  id             String            @id @default(cuid())
+  phone          String            @unique
+  name           String?
+  email          String?
+  profilePhoto   String?
+  city           String?
+  state          String?
+  bio            String?
+  role           Role
+  isVerified     Boolean           @default(false)
+  buyerIdUrl     String?
+  sellerStatus   SellerStatus?
+  sellerDetails  Json?             // {name: string, email: string, govIdUrl: string, address: string, selfieUrl: string}
+  createdAt      DateTime          @default(now())
+  isSuspended    Boolean           @default(false)
+
+  // Relations
+  products       Product[]
+  fraudReports   FraudReport[]
+  supportTickets SupportTicket[]
+  chatsAsBuyer   Chat[]            @relation("ChatBuyer")
+  chatsAsSeller  Chat[]            @relation("ChatSeller")
+  payments       Payment[]
+  favorites      Favorite[]
+}
+
+model Product {
+  id            String        @id @default(cuid())
+  sellerId      String
+  seller        User          @relation(fields: [sellerId], references: [id])
+  title         String
+  description   String
+  price         Float
+  condition     String
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
+  subcategoryId String?
+  subcategory   Subcategory?  @relation(fields: [subcategoryId], references: [id])
+  images        String[]      // Array of image URLs
+  city          String
+  state         String
+  pincode       String
+  status        ProductStatus @default(ACTIVE)
+  paymentId     String?
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  fraudReports FraudReport[]
+  chats        Chat[]
+  favorites    Favorite[]
+
+  // Indexes for performance
+  @@index([sellerId])
+  @@index([status])
+  @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([city])
+  @@index([state])
+  @@index([createdAt])
+  @@index([price])
+  @@index([sellerId, status])
+  @@index([categoryId, status])
+  @@index([city, state])
+  @@index([createdAt, status])
+}
+
+model FraudReport {
+  id          String            @id @default(cuid())
+  reporterId  String
+  reporter    User              @relation(fields: [reporterId], references: [id])
+  productId   String
+  product     Product           @relation(fields: [productId], references: [id])
+  reason      String
+  description String?
+  screenshot  String?
+  status      FraudReportStatus @default(OPEN)
+  adminAction String?
+  createdAt   DateTime          @default(now())
+}
+
+model SupportTicket {
+  id           String              @id @default(cuid())
+  userId       String
+  user         User                @relation(fields: [userId], references: [id])
+  ticketNumber String              @unique
+  email        String
+  category     String
+  description  String
+  screenshot   String?
+  status       SupportTicketStatus @default(OPEN)
+  adminReply   String?
+  replies      Json?               // Array of reply objects with timestamp and content
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model Chat {
+  id            String   @id @default(cuid())
+  buyerId       String
+  buyer         User     @relation("ChatBuyer", fields: [buyerId], references: [id])
+  sellerId      String
+  seller        User     @relation("ChatSeller", fields: [sellerId], references: [id])
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  messages      Json     // Array of message objects: {id, senderId, message, imageUrl, timestamp, isRead}
+  lastMessage   String?
+  lastActivity  DateTime @default(now())
+  buyerUnread   Int      @default(0)
+  sellerUnread  Int      @default(0)
+  buyerBlocked  Boolean  @default(false)
+  sellerBlocked Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Payment {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  amount          Float
+  type            PaymentType
+  razorpayOrderId String?
+  status          String
+  createdAt       DateTime    @default(now())
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([phone])
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  icon        String?
+  createdAt   DateTime     @default(now())
+
+  // Relations
+  subcategories Subcategory[]
+  products      Product[]
+}
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  name       String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime @default(now())
+
+  // Relations
+  products Product[]
+
+  @@unique([name, categoryId])
+}
+
+model Banner {
+  id           String   @id @default(cuid())
+  title        String
+  imageUrl     String
+  linkUrl      String?
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model StaticPage {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  content       String
+  metaTitle     String?
+  metaDescription String?
+  isPublished   Boolean  @default(true)
+  lastUpdated   DateTime @default(now())
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  subject     String
+  htmlContent String
+  isActive    Boolean  @default(true)
+  lastUpdated DateTime @default(now())
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}

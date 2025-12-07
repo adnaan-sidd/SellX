@@ -401,10 +401,10 @@ export async function sendProductSuspensionEmail(to: string, name: string, produ
 }
 
 // Support ticket response email
-export async function sendSupportTicketResponse(to: string, name: string, ticketNumber: string, response: string) {
+export async function sendSupportTicketResponse(to: string, name: string, ticketNumber: string, response: string, category: string = 'Support') {
   const { subject, html, text } = emailTemplates.supportResponse(
     { name },
-    { number: ticketNumber, category: 'Support' },
+    { number: ticketNumber, category },
     response
   )
   return await sendEmail(to, subject, html, text)

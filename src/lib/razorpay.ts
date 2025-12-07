@@ -15,9 +15,3 @@ export function getRazorpay(): Razorpay {
   return razorpayInstance
 }
 
-// For backward compatibility
-export const razorpay = {
-  get instance() {
-    return getRazorpay()
-  }
-}

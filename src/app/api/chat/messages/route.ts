@@ -121,7 +121,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Decrypt messages for the user
-    const rawMessages = Array.isArray(chat.messages) ? chat.messages : []
+    const rawMessages = Array.isArray(chat.messages) 
+      ? chat.messages 
+      : (typeof chat.messages === 'string' ? JSON.parse(chat.messages) : [])
     const decryptedMessages = rawMessages.map((msg: any) => ({
       ...msg,
       message: msg.message ? decryptMessage(msg.message) : ''

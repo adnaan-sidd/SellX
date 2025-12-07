@@ -1,5 +1,8 @@
 "use client"
 
+// Note: Metadata export removed due to "use client" requirement for form interactivity
+// SEO metadata for this page should be added to the parent layout if needed
+
 import { useState } from "react"
 import {
   Mail,

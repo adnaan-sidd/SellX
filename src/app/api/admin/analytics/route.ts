@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
       // Products by category
       prisma.product.groupBy({
-        by: ['category'],
+        by: ['categoryId'],
         where: {
           status: 'ACTIVE',
           createdAt: {

@@ -18,6 +18,7 @@ interface Product {
   city: string
   state: string
   createdAt: string
+  status: string
   seller: {
     id: string
     name: string | null

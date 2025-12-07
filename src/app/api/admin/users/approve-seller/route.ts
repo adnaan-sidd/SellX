@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Send email notification
-    if (seller.sellerDetails?.email) {
+    const sellerDetails = seller.sellerDetails as { email?: string } | null
+    if (sellerDetails?.email) {
       try {
-        await sendSellerApprovalEmail(seller.sellerDetails.email, seller.name || 'Seller')
+        await sendSellerApprovalEmail(sellerDetails.email, seller.name || 'Seller')
       } catch (emailError) {
         console.error('Failed to send approval email:', emailError)
         // Don't fail the request if email fails

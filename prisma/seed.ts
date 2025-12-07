@@ -104,8 +104,45 @@ async function main() {
   ]
 
   for (const product of products) {
+    // Find or create category and subcategory
+    const category = await prisma.category.upsert({
+      where: { name: product.category },
+      update: {},
+      create: { name: product.category }
+    })
+
+    let subcategory = null
+    if (product.subcategory) {
+      subcategory = await prisma.subcategory.upsert({
+        where: {
+          name_categoryId: {
+            name: product.subcategory,
+            categoryId: category.id
+          }
+        },
+        update: {},
+        create: {
+          name: product.subcategory,
+          categoryId: category.id
+        }
+      })
+    }
+
     await prisma.product.create({
-      data: product
+      data: {
+        sellerId: product.sellerId,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        condition: product.condition,
+        categoryId: category.id,
+        subcategoryId: subcategory?.id,
+        images: product.images,
+        city: product.city,
+        state: product.state,
+        pincode: product.pincode,
+        status: product.status
+      }
     })
   }
 

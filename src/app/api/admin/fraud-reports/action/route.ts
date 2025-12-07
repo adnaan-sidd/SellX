@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
         product: {
           select: {
             id: true,
-            title: true
+            title: true,
+            sellerId: true
           }
         }
       }

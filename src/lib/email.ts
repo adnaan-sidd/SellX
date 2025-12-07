@@ -47,7 +47,7 @@ export async function sendEmail(
     return { success: true, messageId: result[0].headers['x-message-id'] }
   } catch (error) {
     console.error('Email sending failed:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: (error as Error).message }
   }
 }
 
@@ -306,3 +306,154 @@ export class EmailQueue {
 }
 
 export const emailQueue = new EmailQueue()
+
+// Seller approval email
+export async function sendSellerApprovalEmail(to: string, name: string) {
+  const { subject, html, text } = {
+    subject: 'Seller Account Approved! 🎉',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #10B981;">Congratulations ${name}!</h1>
+        <p>Your seller account has been approved.</p>
+        <p>You can now start listing products on SellX.</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard"
+           style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0;">
+          Go to Dashboard
+        </a>
+        <p>The SellX Team</p>
+      </div>
+    `,
+    text: `Congratulations ${name}! Your seller account has been approved. You can now start listing products on SellX.`
+  }
+  return await sendEmail(to, subject, html, text)
+}
+
+// Seller rejection email
+export async function sendSellerRejectionEmail(to: string, name: string, reason: string) {
+  const { subject, html, text } = {
+    subject: 'Seller Application Update',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #EF4444;">Seller Application Status</h1>
+        <p>Hello ${name},</p>
+        <p>Unfortunately, your seller application was not approved at this time.</p>
+        <div style="background-color: #FEE2E2; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <p><strong>Reason:</strong> ${reason}</p>
+        </div>
+        <p>You can reapply after addressing the issues mentioned above.</p>
+        <p>If you have any questions, please contact our support team.</p>
+        <p>The SellX Team</p>
+      </div>
+    `,
+    text: `Hello ${name}, your seller application was not approved. Reason: ${reason}. You can reapply after addressing the issues.`
+  }
+  return await sendEmail(to, subject, html, text)
+}
+
+// Account suspension email
+export async function sendAccountSuspensionEmail(to: string, name: string, reason: string) {
+  const { subject, html, text } = {
+    subject: 'Account Suspended - Action Required',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #EF4444;">Account Suspended</h1>
+        <p>Hello ${name},</p>
+        <p>Your account has been suspended due to the following reason:</p>
+        <div style="background-color: #FEE2E2; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <p>${reason}</p>
+        </div>
+        <p>Please contact our support team to resolve this issue.</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/support"
+           style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0;">
+          Contact Support
+        </a>
+        <p>The SellX Team</p>
+      </div>
+    `,
+    text: `Hello ${name}, your account has been suspended. Reason: ${reason}. Please contact support.`
+  }
+  return await sendEmail(to, subject, html, text)
+}
+
+// Product suspension email
+export async function sendProductSuspensionEmail(to: string, name: string, productTitle: string, reason: string) {
+  const { subject, html, text } = {
+    subject: 'Product Suspended - Action Required',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #F59E0B;">Product Suspended</h1>
+        <p>Hello ${name},</p>
+        <p>Your product "${productTitle}" has been suspended.</p>
+        <div style="background-color: #FFFBEB; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #F59E0B;">
+          <p><strong>Reason:</strong> ${reason}</p>
+        </div>
+        <p>Please contact our support team for more information.</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/support"
+           style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0;">
+          Contact Support
+        </a>
+        <p>The SellX Team</p>
+      </div>
+    `,
+    text: `Hello ${name}, your product "${productTitle}" has been suspended. Reason: ${reason}. Please contact support.`
+  }
+  return await sendEmail(to, subject, html, text)
+}
+
+// Support ticket response email
+export async function sendSupportTicketResponse(to: string, name: string, ticketNumber: string, response: string, category: string = 'Support') {
+  const { subject, html, text } = emailTemplates.supportResponse(
+    { name },
+    { number: ticketNumber, category },
+    response
+  )
+  return await sendEmail(to, subject, html, text)
+}
+
+// Fraud report resolution email
+export async function sendFraudReportResolutionEmail(to: string, name: string, reportId: string, action: string, notes?: string) {
+  const { subject, html, text } = {
+    subject: 'Fraud Report Resolution Update',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #3B82F6;">Fraud Report Update</h1>
+        <p>Hello ${name},</p>
+        <p>Your fraud report (${reportId}) has been reviewed and ${action}.</p>
+        ${notes ? `
+        <div style="background-color: #F3F4F6; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <p><strong>Admin Notes:</strong></p>
+          <p>${notes}</p>
+        </div>
+        ` : ''}
+        <p>Thank you for helping keep our marketplace safe.</p>
+        <p>The SellX Team</p>
+      </div>
+    `,
+    text: `Hello ${name}, your fraud report (${reportId}) has been reviewed and ${action}.${notes ? ' Admin Notes: ' + notes : ''} Thank you for helping keep our marketplace safe.`
+  }
+  return await sendEmail(to, subject, html, text)
+}
+
+// Support ticket reply email
+export async function sendSupportReplyEmail(to: string, name: string, ticketNumber: string, reply: string) {
+  const { subject, html, text } = {
+    subject: `Support Ticket #${ticketNumber} - New Reply`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #3B82F6;">Support Ticket Reply</h1>
+        <p>Hello ${name},</p>
+        <p>We have replied to your support ticket #${ticketNumber}:</p>
+        <div style="background-color: #F3F4F6; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <p>${reply.replace(/\n/g, '<br>')}</p>
+        </div>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/support/tickets"
+           style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0;">
+          View Ticket
+        </a>
+        <p>The SellX Support Team</p>
+      </div>
+    `,
+    text: `Hello ${name}, we have replied to your support ticket #${ticketNumber}: ${reply}`
+  }
+  return await sendEmail(to, subject, html, text)
+}

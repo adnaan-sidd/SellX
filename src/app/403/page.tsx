@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link'
 import { Shield, Lock, ArrowLeft, Home, User, AlertTriangle } from 'lucide-react'
 

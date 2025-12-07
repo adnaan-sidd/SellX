@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { razorpay } from '@/lib/razorpay'
+import { getRazorpay } from '@/lib/razorpay'
 import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { s3 } from '@/lib/s3'
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     // Verify payment with Razorpay
     let payment
     try {
+      const razorpay = getRazorpay()
       payment = await razorpay.payments.fetch(razorpay_payment_id)
     } catch (razorpayError) {
       console.error('Razorpay payment fetch error:', razorpayError)
@@ -107,8 +108,8 @@ export async function POST(request: NextRequest) {
         description: productData.description,
         price: parseFloat(productData.price),
         condition: productData.condition,
-        category: productData.category,
-        subcategory: productData.subcategory,
+        categoryId: productData.category,
+        subcategoryId: productData.subcategory,
         images: imageUrls,
         city: productData.city,
         state: productData.state,

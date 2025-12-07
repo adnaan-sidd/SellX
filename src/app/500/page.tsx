@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link'
 import { AlertTriangle, RefreshCw, Home, MessageSquare } from 'lucide-react'
 

@@ -4,9 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 // POST - Add a reply to a support ticket
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const ticketId = params.id
+    const { id: ticketId } = await params
     const { content } = await request.json()
 
     if (!content || !content.trim()) {

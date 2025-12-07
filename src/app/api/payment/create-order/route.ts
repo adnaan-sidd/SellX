@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { razorpay } from '@/lib/razorpay'
+import { getRazorpay } from '@/lib/razorpay'
 import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const razorpay = getRazorpay()
     const order = await razorpay.orders.create(orderOptions)
 
     return NextResponse.json({

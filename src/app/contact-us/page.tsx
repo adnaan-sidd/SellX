@@ -1,4 +1,5 @@
-import type { Metadata } from "next"
+"use client"
+
 import { useState } from "react"
 import {
   Mail,
@@ -10,17 +11,6 @@ import {
   Shield,
   MessageSquare
 } from "lucide-react"
-
-export const metadata: Metadata = {
-  title: "Contact Us - SellX",
-  description: "Get in touch with SellX support team. We're here to help with any questions about buying, selling, or using our platform.",
-  keywords: "contact SellX, support, help, customer service, contact form",
-  openGraph: {
-    title: "Contact Us - SellX",
-    description: "Get in touch with SellX support team",
-    type: "website",
-  },
-}
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({

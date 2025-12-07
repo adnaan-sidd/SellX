@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
     })
 
     // Send email notification
-    if (seller.sellerDetails?.email) {
+    if (seller.sellerDetails && typeof seller.sellerDetails === 'object' && 'email' in seller.sellerDetails) {
       try {
-        await sendSellerApprovalEmail(seller.sellerDetails.email, seller.name || 'Seller')
+        await sendSellerApprovalEmail((seller.sellerDetails as any).email, seller.name || 'Seller')
       } catch (emailError) {
         console.error('Failed to send approval email:', emailError)
         // Don't fail the request if email fails

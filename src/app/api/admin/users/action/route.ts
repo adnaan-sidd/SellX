@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
 
     // Send email notification for suspension
     if (action === 'suspend') {
-      const email = userType === 'seller'
-        ? updatedUser.sellerDetails?.email
+      const email = userType === 'seller' && updatedUser.sellerDetails && typeof updatedUser.sellerDetails === 'object' && 'email' in updatedUser.sellerDetails
+        ? (updatedUser.sellerDetails as any).email
         : null // Buyers don't have email in sellerDetails
 
       if (email) {

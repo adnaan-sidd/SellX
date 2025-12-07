@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         ticketNumber,
+        subject: `${category} - Support Request`,
         email,
         category,
         description,

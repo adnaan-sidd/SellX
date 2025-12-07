@@ -33,11 +33,16 @@ export default function SellerStatus() {
   const [sellerData, setSellerData] = useState<SellerStatus | null>(null)
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/signup')
+      return
+    }
+
     const fetchSellerStatus = async () => {
       try {
         const response = await fetch('/api/seller/status')
         const data = await response.json()
-        
+
         if (response.ok) {
           setSellerData(data)
         }
@@ -48,15 +53,8 @@ export default function SellerStatus() {
       }
     }
 
-    if (isAuthenticated) {
-      fetchSellerStatus()
-    }
-  }, [isAuthenticated])
-
-  if (!isAuthenticated) {
-    router.push('/signup')
-    return null
-  }
+    fetchSellerStatus()
+  }, [isAuthenticated, router])
 
   if (loading) {
     return (

@@ -1,7 +1,8 @@
 import { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
+import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -9,50 +10,67 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        phone: { label: "Phone", type: "text" }
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
-        if (!credentials?.phone) return null
+      async authorize(credentials, req) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
 
         const user = await prisma.user.findUnique({
-          where: { phone: credentials.phone }
+          where: {
+            email: credentials.email
+          }
         })
 
-        if (!user || !user.isVerified) return null
+        if (!user || !user.password) {
+          return null
+        }
+
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+
+        if (!isPasswordValid) {
+          return null
+        }
 
         return {
           id: user.id,
           phone: user.phone,
+          email: user.email,
+          name: user.name,
           role: user.role,
           isVerified: user.isVerified,
-          isSuspended: user.isSuspended
+          sellerStatus: user.sellerStatus || undefined,
         }
       }
     })
   ],
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
   callbacks: {
-    jwt: async ({ token, user }) => {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role
-        token.isVerified = (user as any).isVerified
-        token.isSuspended = (user as any).isSuspended
+        token.phone = user.phone
+        token.role = user.role
+        token.isVerified = user.isVerified
+        token.sellerStatus = user.sellerStatus
       }
       return token
     },
-    session: async ({ session, token }) => {
-      if (token) {
-        session.user.id = token.sub as string
-        session.user.role = (token as any).role
-        session.user.isVerified = (token as any).isVerified
-        session.user.isSuspended = (token as any).isSuspended
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub!
+        session.user.phone = token.phone as string
+        session.user.role = token.role as string
+        session.user.isVerified = token.isVerified as boolean
+        session.user.sellerStatus = token.sellerStatus as string
       }
       return session
-    }
+    },
   },
   pages: {
-    signIn: "/auth/signin"
-  }
+    signIn: "/auth/signin",
+  },
 }

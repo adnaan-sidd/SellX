@@ -102,6 +102,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Create product
+    // Find category and subcategory IDs
+    const categoryRecord = await prisma.category.findFirst({
+      where: { name: category }
+    })
+    const subcategoryRecord = await prisma.subcategory.findFirst({
+      where: { name: subcategory }
+    })
+
+    if (!categoryRecord || !subcategoryRecord) {
+      return NextResponse.json({ error: 'Invalid category or subcategory' }, { status: 400 })
+    }
+
     const product = await prisma.product.create({
       data: {
         sellerId: session.user.id,
@@ -109,8 +121,8 @@ export async function POST(request: NextRequest) {
         description,
         price: priceNum,
         condition,
-        category,
-        subcategory,
+        categoryId: categoryRecord.id,
+        subcategoryId: subcategoryRecord.id,
         images: imageUrls,
         city,
         state,

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     // Create initial message if provided
     let initialMessage = null
     if (message && message.trim()) {
-      const { encryptMessage } = await import('@/app/api/socket/route')
+      const { encryptMessage } = await import('@/lib/socket')
       initialMessage = {
         id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         senderId: session.user.id,
@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
         productId: productId,
         messages: initialMessage ? JSON.stringify([initialMessage]) : JSON.stringify([]),
         lastMessage: message ? message.substring(0, 100) : null,
-        lastActivity: new Date(),
         buyerUnread: 0,
         sellerUnread: initialMessage ? 1 : 0,
         buyerBlocked: false,

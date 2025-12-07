@@ -7,8 +7,8 @@ export function useAuth() {
     user: session?.user,
     isLoading: status === "loading",
     isAuthenticated: !!session,
-    role: (session?.user as any)?.role,
-    isVerified: (session?.user as any)?.isVerified,
-    isSuspended: (session?.user as any)?.isSuspended
+    role: session?.user?.role,
+    isVerified: session?.user?.isVerified,
+    sellerStatus: session?.user?.sellerStatus,
   }
 }

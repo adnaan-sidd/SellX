@@ -1,8 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/useAuth"
+import { signOut } from "next-auth/react"
 import {
   User,
   MapPin,
@@ -189,6 +187,13 @@ export default function Profile() {
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Profile
+                  </button>
+
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors"
+                  >
+                    Sign Out
                   </button>
                 </div>
               </div>

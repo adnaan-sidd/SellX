@@ -1,74 +1,89 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { signIn } from 'next-auth/react'
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
 
 export async function POST(request: NextRequest) {
   try {
-    const { phone, code } = await request.json()
+    const { phone, otp } = await request.json()
 
-    if (!phone || !code) {
-      return NextResponse.json({ error: 'Phone and code are required' }, { status: 400 })
+    if (!phone || !otp) {
+      return NextResponse.json(
+        { error: 'Phone number and OTP are required' },
+        { status: 400 }
+      )
     }
 
-    // Find the OTP
-    const otp = await prisma.oTP.findUnique({
-      where: { phone }
+    // Find OTP in database
+    const otpRecord = await prisma.oTP.findUnique({
+      where: { phone },
     })
 
-    if (!otp) {
-      return NextResponse.json({ error: 'OTP not found' }, { status: 400 })
+    if (!otpRecord) {
+      return NextResponse.json(
+        { error: 'OTP not found. Please request a new one.' },
+        { status: 400 }
+      )
     }
 
-    // Check if expired
-    if (otp.expiresAt < new Date()) {
-      await prisma.oTP.delete({ where: { phone } })
-      return NextResponse.json({ error: 'OTP expired' }, { status: 400 })
+    // Check if OTP is expired
+    if (otpRecord.expiresAt < new Date()) {
+      return NextResponse.json(
+        { error: 'OTP has expired. Please request a new one.' },
+        { status: 400 }
+      )
     }
 
-    // Check code
-    if (otp.code !== code) {
-      return NextResponse.json({ error: 'Invalid OTP' }, { status: 400 })
+    // Check if OTP matches
+    if (otpRecord.code !== otp) {
+      return NextResponse.json(
+        { error: 'Invalid OTP' },
+        { status: 400 }
+      )
     }
-
-    // Delete the OTP
-    await prisma.oTP.delete({ where: { phone } })
 
     // Find or create user
     let user = await prisma.user.findUnique({
-      where: { phone }
+      where: { phone },
     })
 
     if (!user) {
+      // Create new user if doesn't exist
       user = await prisma.user.create({
         data: {
           phone,
-          role: 'BUYER', // Default role
-          isVerified: true
-        }
+          role: 'BUYER',
+          isVerified: true,
+        },
       })
     } else {
       // Update verification status
       user = await prisma.user.update({
         where: { phone },
-        data: { isVerified: true }
+        data: { isVerified: true },
       })
     }
 
-    // Since this is API route, we can't use signIn directly
-    // Instead, return success and let client handle signIn
+    // Delete used OTP
+    await prisma.oTP.delete({
+      where: { phone },
+    })
+
     return NextResponse.json({
       message: 'OTP verified successfully',
       user: {
         id: user.id,
         phone: user.phone,
+        email: user.email,
+        name: user.name,
         role: user.role,
-        isVerified: user.isVerified
-      }
+        isVerified: user.isVerified,
+      },
     })
   } catch (error) {
     console.error('Verify OTP error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

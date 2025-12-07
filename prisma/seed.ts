@@ -1,105 +1,160 @@
-import "dotenv/config"
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Role } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create sample users
-  const seller1 = await prisma.user.upsert({
-    where: { phone: '+919876543210' },
+  // Create admin user
+  const adminPassword = await bcrypt.hash('admin123', 10)
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@sellx.com' },
     update: {},
     create: {
+      email: 'admin@sellx.com',
       phone: '+919876543210',
-      name: 'John Seller',
-      role: 'SELLER',
+      name: 'SellX Admin',
+      password: adminPassword,
+      role: Role.ADMIN,
       isVerified: true,
-      sellerStatus: 'APPROVED'
-    }
+      city: 'Mumbai',
+      state: 'Maharashtra'
+    },
   })
 
-  const seller2 = await prisma.user.upsert({
-    where: { phone: '+919876543211' },
+  // Create sample categories
+  const electronics = await prisma.category.upsert({
+    where: { name: 'Electronics' },
     update: {},
     create: {
+      name: 'Electronics',
+      subcategories: {
+        create: [
+          { name: 'Smartphones' },
+          { name: 'Laptops' },
+          { name: 'Headphones' },
+          { name: 'Cameras' }
+        ]
+      }
+    },
+    include: { subcategories: true }
+  })
+
+  const fashion = await prisma.category.upsert({
+    where: { name: 'Fashion' },
+    update: {},
+    create: {
+      name: 'Fashion',
+      subcategories: {
+        create: [
+          { name: 'Men\'s Clothing' },
+          { name: 'Women\'s Clothing' },
+          { name: 'Shoes' },
+          { name: 'Accessories' }
+        ]
+      }
+    },
+    include: { subcategories: true }
+  })
+
+  const home = await prisma.category.upsert({
+    where: { name: 'Home & Garden' },
+    update: {},
+    create: {
+      name: 'Home & Garden',
+      subcategories: {
+        create: [
+          { name: 'Furniture' },
+          { name: 'Decor' },
+          { name: 'Kitchen' },
+          { name: 'Garden' }
+        ]
+      }
+    },
+    include: { subcategories: true }
+  })
+
+  // Create sample seller
+  const sellerPassword = await bcrypt.hash('seller123', 10)
+  const seller = await prisma.user.upsert({
+    where: { email: 'seller@sellx.com' },
+    update: {},
+    create: {
+      email: 'seller@sellx.com',
       phone: '+919876543211',
-      name: 'Jane Seller',
-      role: 'SELLER',
+      name: 'John Seller',
+      password: sellerPassword,
+      role: Role.SELLER,
+      sellerStatus: 'APPROVED',
       isVerified: true,
-      sellerStatus: 'APPROVED'
-    }
+      city: 'Delhi',
+      state: 'Delhi',
+      sellerDetails: {
+        businessName: 'TechHub Electronics',
+        gstNumber: 'GST123456789',
+        address: '123 Tech Street, Delhi',
+        bankAccount: '1234567890',
+        ifscCode: 'SBIN0001234'
+      }
+    },
+  })
+
+  // Create sample buyer
+  const buyerPassword = await bcrypt.hash('buyer123', 10)
+  const buyer = await prisma.user.upsert({
+    where: { email: 'buyer@sellx.com' },
+    update: {},
+    create: {
+      email: 'buyer@sellx.com',
+      phone: '+919876543212',
+      name: 'Jane Buyer',
+      password: buyerPassword,
+      role: Role.BUYER,
+      isVerified: true,
+      city: 'Bangalore',
+      state: 'Karnataka'
+    },
   })
 
   // Create sample products
   const products = [
     {
-      sellerId: seller1.id,
-      title: 'iPhone 14 Pro Max',
-      description: 'Latest iPhone with excellent camera',
-      price: 120000,
+      sellerId: seller.id,
+      title: 'iPhone 15 Pro Max',
+      description: 'Brand new iPhone 15 Pro Max with 256GB storage. Comes with original box and accessories.',
+      price: 149999,
       condition: 'New',
-      category: 'Electronics',
-      subcategory: 'Mobiles',
-      images: ['https://via.placeholder.com/400x400?text=iPhone'],
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400001',
-      status: 'ACTIVE' as const
-    },
-    {
-      sellerId: seller1.id,
-      title: 'MacBook Pro M3',
-      description: 'Powerful laptop for professionals',
-      price: 180000,
-      condition: 'New',
-      category: 'Electronics',
-      subcategory: 'Laptops',
-      images: ['https://via.placeholder.com/400x400?text=MacBook'],
+      categoryId: electronics.id,
+      subcategoryId: electronics.subcategories[0].id,
+      images: ['https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500'],
       city: 'Delhi',
       state: 'Delhi',
-      pincode: '110001',
-      status: 'ACTIVE' as const
+      pincode: '110001'
     },
     {
-      sellerId: seller2.id,
-      title: 'Honda City 2020',
-      description: 'Well maintained sedan',
-      price: 800000,
-      condition: 'Used',
-      category: 'Vehicles',
-      subcategory: 'Cars',
-      images: ['https://via.placeholder.com/400x400?text=Honda+City'],
-      city: 'Bangalore',
-      state: 'Karnataka',
-      pincode: '560001',
-      status: 'ACTIVE' as const
-    },
-    {
-      sellerId: seller2.id,
-      title: 'Wooden Dining Table',
-      description: 'Beautiful 6-seater dining table',
-      price: 25000,
+      sellerId: seller.id,
+      title: 'MacBook Pro M3',
+      description: 'Latest MacBook Pro with M3 chip, 16GB RAM, 512GB SSD. Perfect for professionals.',
+      price: 199999,
       condition: 'New',
-      category: 'Home & Furniture',
-      subcategory: 'Furniture',
-      images: ['https://via.placeholder.com/400x400?text=Dining+Table'],
-      city: 'Chennai',
-      state: 'Tamil Nadu',
-      pincode: '600001',
-      status: 'ACTIVE' as const
+      categoryId: electronics.id,
+      subcategoryId: electronics.subcategories[1].id,
+      images: ['https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=500'],
+      city: 'Delhi',
+      state: 'Delhi',
+      pincode: '110001'
     },
     {
-      sellerId: seller1.id,
-      title: 'Nike Air Max Shoes',
-      description: 'Comfortable running shoes',
-      price: 8000,
+      sellerId: seller.id,
+      title: 'Sony WH-1000XM5 Headphones',
+      description: 'Premium noise-canceling wireless headphones with exceptional sound quality.',
+      price: 29999,
       condition: 'New',
-      category: 'Fashion',
-      subcategory: 'Footwear',
-      images: ['https://via.placeholder.com/400x400?text=Nike+Shoes'],
-      city: 'Pune',
-      state: 'Maharashtra',
-      pincode: '411001',
-      status: 'ACTIVE' as const
+      categoryId: electronics.id,
+      subcategoryId: electronics.subcategories[2].id,
+      images: ['https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500'],
+      city: 'Delhi',
+      state: 'Delhi',
+      pincode: '110001'
     }
   ]
 
@@ -109,7 +164,10 @@ async function main() {
     })
   }
 
-  console.log('Sample data seeded successfully')
+  console.log('Database seeded successfully!')
+  console.log('Admin login: admin@sellx.com / admin123')
+  console.log('Seller login: seller@sellx.com / seller123')
+  console.log('Buyer login: buyer@sellx.com / buyer123')
 }
 
 main()

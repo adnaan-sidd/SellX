@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { 
@@ -39,12 +39,18 @@ export default function BecomeSeller() {
     governmentId: null,
     selfieWithId: null
   })
-  
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [previewGovtId, setPreviewGovtId] = useState<string | null>(null)
   const [previewSelfie, setPreviewSelfie] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/signup')
+    }
+  }, [isAuthenticated, router])
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -140,7 +146,6 @@ export default function BecomeSeller() {
   }
 
   if (!isAuthenticated) {
-    router.push('/signup')
     return null
   }
 

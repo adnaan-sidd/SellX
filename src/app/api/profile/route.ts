@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
         profilePhoto: true,
         city: true,
         state: true,
-        bio: true,
         role: true,
         isVerified: true,
         buyerIdUrl: true,
@@ -30,7 +29,8 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             products: true,
-            chats: true,
+            chatsAsBuyer: true,
+            chatsAsSeller: true,
             fraudReports: true
           }
         }
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const stats = {
       totalProducts: user._count.products,
       activeProducts,
-      totalChats: user._count.chats,
+      totalChats: user._count.chatsAsBuyer + user._count.chatsAsSeller,
       totalReports: user._count.fraudReports
     }
 

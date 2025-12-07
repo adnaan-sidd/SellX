@@ -35,6 +35,11 @@ export default function MyReports() {
   const [error, setError] = useState("")
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/signup')
+      return
+    }
+
     const fetchReports = async () => {
       try {
         const response = await fetch('/api/fraud-reports/my-reports')
@@ -53,10 +58,8 @@ export default function MyReports() {
       }
     }
 
-    if (isAuthenticated) {
-      fetchReports()
-    }
-  }, [isAuthenticated])
+    fetchReports()
+  }, [isAuthenticated, router])
 
   const getReasonLabel = (reason: string) => {
     const labels: Record<string, string> = {
@@ -110,11 +113,6 @@ export default function MyReports() {
       hour: '2-digit',
       minute: '2-digit'
     })
-  }
-
-  if (!isAuthenticated) {
-    router.push('/signup')
-    return null
   }
 
   if (loading) {

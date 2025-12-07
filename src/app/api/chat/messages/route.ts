@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { decryptMessage } from '@/app/api/socket/route'
+import { decryptMessage } from '@/lib/socket'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Check if product exists
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      select: { id: true, status: true }
+      select: { id: true, status: true, sellerId: true }
     })
 
     if (!product) {
@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
       include: {
         product: {
           select: {
+            id: true,
+            status: true,
+            sellerId: true,
             title: true,
             images: true,
             price: true,
@@ -96,6 +99,9 @@ export async function POST(request: NextRequest) {
         include: {
           product: {
             select: {
+              id: true,
+              status: true,
+              sellerId: true,
               title: true,
               images: true,
               price: true,

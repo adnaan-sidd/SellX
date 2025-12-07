@@ -85,6 +85,11 @@ export default function PostProduct() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/signup')
+      return
+    }
+
     const checkSellerStatus = async () => {
       try {
         const response = await fetch('/api/seller/status')
@@ -108,9 +113,7 @@ export default function PostProduct() {
       }
     }
 
-    if (isAuthenticated) {
-      checkSellerStatus()
-    }
+    checkSellerStatus()
   }, [isAuthenticated, router])
 
   const handleInputChange = (field: keyof FormData, value: string) => {

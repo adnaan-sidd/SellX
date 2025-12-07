@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
         reporterId: session.user.id,
         productId: productId,
         reason: reason,
-        description: description || null,
-        screenshot: screenshotUrl
+        description: description,
+        evidence: screenshotUrl ? [screenshotUrl] : []
       }
     })
 

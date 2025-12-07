@@ -15,7 +15,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!isLoading && (!isAuthenticated || user?.role !== 'ADMIN')) {
-      router.push('/home')
+      router.push('/')
     }
   }, [isAuthenticated, user, isLoading, router])
 

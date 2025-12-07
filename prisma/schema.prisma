@@ -1,6 +1,9 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -44,203 +47,247 @@ enum PaymentType {
 }
 
 model User {
-  id             String            @id @default(cuid())
-  phone          String            @unique
-  name           String?
-  email          String?
-  profilePhoto   String?
-  city           String?
-  state          String?
-  bio            String?
-  role           Role
-  isVerified     Boolean           @default(false)
-  buyerIdUrl     String?
-  sellerStatus   SellerStatus?
-  sellerDetails  Json?             // {name: string, email: string, govIdUrl: string, address: string, selfieUrl: string}
-  createdAt      DateTime          @default(now())
-  isSuspended    Boolean           @default(false)
+  id           String        @id @default(cuid())
+  phone        String        @unique
+  email        String?       @unique
+  name         String?
+  password     String?
+  role         Role
+  isVerified   Boolean       @default(false)
+  buyerIdUrl   String?
+  sellerStatus SellerStatus?
+  sellerDetails Json?
+  city         String?
+  state        String?
+  profilePhoto String?
+  createdAt    DateTime      @default(now())
+  isSuspended  Boolean       @default(false)
 
   // Relations
-  products       Product[]
-  fraudReports   FraudReport[]
+  products      Product[]
+  favorites     Favorite[]
+  fraudReports  FraudReport[]
   supportTickets SupportTicket[]
-  chatsAsBuyer   Chat[]            @relation("ChatBuyer")
-  chatsAsSeller  Chat[]            @relation("ChatSeller")
-  payments       Payment[]
-  favorites      Favorite[]
+  payments      Payment[]
+  chatsAsBuyer  Chat[]        @relation("ChatBuyer")
+  chatsAsSeller Chat[]        @relation("ChatSeller")
+
+  @@map("User")
 }
 
 model Product {
-  id            String        @id @default(cuid())
-  sellerId      String
-  seller        User          @relation(fields: [sellerId], references: [id])
-  title         String
-  description   String
-  price         Float
-  condition     String
-  categoryId    String
-  category      Category      @relation(fields: [categoryId], references: [id])
-  subcategoryId String?
-  subcategory   Subcategory?  @relation(fields: [subcategoryId], references: [id])
-  images        String[]      // Array of image URLs
-  city          String
-  state         String
-  pincode       String
-  status        ProductStatus @default(ACTIVE)
-  paymentId     String?
-  createdAt     DateTime      @default(now())
+  id          String        @id @default(cuid())
+  sellerId    String
+  title       String
+  description String
+  price       Float
+  condition   String
+  categoryId  String
+  subcategoryId String
+  images      String[]
+  city        String
+  state       String
+  pincode     String
+  status      ProductStatus @default(ACTIVE)
+  paymentId   String?
+  createdAt   DateTime      @default(now())
 
   // Relations
+  seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  category    Category      @relation(fields: [categoryId], references: [id])
+  subcategory Subcategory   @relation(fields: [subcategoryId], references: [id])
+  favorites   Favorite[]
   fraudReports FraudReport[]
-  chats        Chat[]
-  favorites    Favorite[]
+  chats       Chat[]
 
-  // Indexes for performance
-  @@index([sellerId])
-  @@index([status])
   @@index([categoryId])
-  @@index([subcategoryId])
-  @@index([city])
-  @@index([state])
-  @@index([createdAt])
-  @@index([price])
-  @@index([sellerId, status])
   @@index([categoryId, status])
+  @@index([city])
   @@index([city, state])
+  @@index([createdAt])
   @@index([createdAt, status])
-}
+  @@index([price])
+  @@index([sellerId])
+  @@index([sellerId, status])
+  @@index([state])
+  @@index([status])
+  @@index([subcategoryId])
 
-model FraudReport {
-  id          String            @id @default(cuid())
-  reporterId  String
-  reporter    User              @relation(fields: [reporterId], references: [id])
-  productId   String
-  product     Product           @relation(fields: [productId], references: [id])
-  reason      String
-  description String?
-  screenshot  String?
-  status      FraudReportStatus @default(OPEN)
-  adminAction String?
-  createdAt   DateTime          @default(now())
-}
-
-model SupportTicket {
-  id           String              @id @default(cuid())
-  userId       String
-  user         User                @relation(fields: [userId], references: [id])
-  ticketNumber String              @unique
-  email        String
-  category     String
-  description  String
-  screenshot   String?
-  status       SupportTicketStatus @default(OPEN)
-  adminReply   String?
-  replies      Json?               // Array of reply objects with timestamp and content
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-}
-
-model Chat {
-  id            String   @id @default(cuid())
-  buyerId       String
-  buyer         User     @relation("ChatBuyer", fields: [buyerId], references: [id])
-  sellerId      String
-  seller        User     @relation("ChatSeller", fields: [sellerId], references: [id])
-  productId     String
-  product       Product  @relation(fields: [productId], references: [id])
-  messages      Json     // Array of message objects: {id, senderId, message, imageUrl, timestamp, isRead}
-  lastMessage   String?
-  lastActivity  DateTime @default(now())
-  buyerUnread   Int      @default(0)
-  sellerUnread  Int      @default(0)
-  buyerBlocked  Boolean  @default(false)
-  sellerBlocked Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model Payment {
-  id              String      @id @default(cuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  amount          Float
-  type            PaymentType
-  razorpayOrderId String?
-  status          String
-  createdAt       DateTime    @default(now())
-}
-
-model OTP {
-  id        String   @id @default(cuid())
-  phone     String
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@unique([phone])
+  @@map("Product")
 }
 
 model Category {
-  id          String       @id @default(cuid())
-  name        String       @unique
-  icon        String?
-  createdAt   DateTime     @default(now())
+  id       String   @id @default(cuid())
+  name     String   @unique
+  image    String?
+  icon     String?
+  createdAt DateTime @default(now())
 
   // Relations
   subcategories Subcategory[]
   products      Product[]
+
+  @@map("Category")
 }
 
 model Subcategory {
   id         String   @id @default(cuid())
   name       String
   categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-  createdAt  DateTime @default(now())
+  image      String?
 
   // Relations
-  products Product[]
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products   Product[]
 
   @@unique([name, categoryId])
-}
 
-model Banner {
-  id           String   @id @default(cuid())
-  title        String
-  imageUrl     String
-  linkUrl      String?
-  isActive     Boolean  @default(true)
-  displayOrder Int      @default(0)
-  createdAt    DateTime @default(now())
-}
-
-model StaticPage {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  title         String
-  content       String
-  metaTitle     String?
-  metaDescription String?
-  isPublished   Boolean  @default(true)
-  lastUpdated   DateTime @default(now())
-}
-
-model EmailTemplate {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  subject     String
-  htmlContent String
-  isActive    Boolean  @default(true)
-  lastUpdated DateTime @default(now())
+  @@map("Subcategory")
 }
 
 model Favorite {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
 
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   @@unique([userId, productId])
+
+  @@map("Favorite")
+}
+
+model FraudReport {
+  id          String            @id @default(cuid())
+  reporterId  String
+  productId   String
+  reason      String
+  description String?
+  evidence    String[]
+  status      FraudReportStatus @default(OPEN)
+  adminNotes  String?
+  createdAt   DateTime          @default(now())
+  resolvedAt  DateTime?
+
+  // Relations
+  reporter User    @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("FraudReport")
+}
+
+model SupportTicket {
+  id           String              @id @default(cuid())
+  ticketNumber String              @unique
+  userId       String
+  subject      String
+  description  String
+  category     String?
+  email        String?
+  status       SupportTicketStatus @default(OPEN)
+  priority     String              @default("medium")
+  attachments  String[]
+  replies      String?             // JSON string of replies
+  adminReply   String?
+  screenshot   String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("SupportTicket")
+}
+
+model Payment {
+  id            String      @id @default(cuid())
+  userId        String
+  type          PaymentType
+  amount        Float
+  currency      String      @default("INR")
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  status        String
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("Payment")
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  code      String
+  purpose   String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("OTP")
+}
+
+model Chat {
+  id            String   @id @default(cuid())
+  buyerId       String
+  sellerId      String
+  productId     String
+  messages      String?  // JSON string of messages
+  lastMessage   String?
+  buyerUnread   Int      @default(0)
+  sellerUnread  Int      @default(0)
+  buyerBlocked  Boolean  @default(false)
+  sellerBlocked Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  buyer   User    @relation("ChatBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller  User    @relation("ChatSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("Chat")
+}
+
+model Banner {
+  id          String @id @default(cuid())
+  title       String
+  image       String?
+  imageUrl    String?
+  linkUrl     String?
+  isActive    Boolean @default(true)
+  displayOrder Int    @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("Banner")
+}
+
+model EmailTemplate {
+  id       String   @id @default(cuid())
+  name     String   @unique
+  subject  String
+  html     String
+  text     String?
+  variables Json?
+  isActive Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("EmailTemplate")
+}
+
+model StaticPage {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  content     String
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("StaticPage")
 }

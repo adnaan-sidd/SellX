@@ -1,144 +1,129 @@
 "use client"
 
-interface Filters {
-  search: string
-  category: string
-  minPrice: string
-  maxPrice: string
-  condition: string
-  city: string
-  sort: string
-}
+import { useState } from 'react'
 
 interface ProductFiltersProps {
-  filters: Filters
-  onChange: (filters: Partial<Filters>) => void
-  onApply: () => void
+  filters: {
+    category: string
+    minPrice: string
+    maxPrice: string
+    location: string
+    search: string
+  }
+  onFilterChange: (filters: ProductFiltersProps['filters']) => void
 }
 
-const categories = [
-  { value: '', label: 'All Categories' },
-  { value: 'Electronics', label: 'Electronics' },
-  { value: 'Vehicles', label: 'Vehicles' },
-  { value: 'Home & Furniture', label: 'Home & Furniture' },
-  { value: 'Fashion', label: 'Fashion' },
-  { value: 'Books & Sports', label: 'Books & Sports' },
-  { value: 'Pets', label: 'Pets' }
-]
+export default function ProductFilters({ filters, onFilterChange }: ProductFiltersProps) {
+  const [localFilters, setLocalFilters] = useState(filters)
 
-const conditions = [
-  { value: '', label: 'Any Condition' },
-  { value: 'New', label: 'New' },
-  { value: 'Used', label: 'Used' }
-]
-
-export default function ProductFilters({ filters, onChange, onApply }: ProductFiltersProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onApply()
+  const handleInputChange = (key: keyof typeof filters, value: string) => {
+    const newFilters = { ...localFilters, [key]: value }
+    setLocalFilters(newFilters)
+    onFilterChange(newFilters)
   }
 
+  const categories = [
+    'Electronics',
+    'Fashion',
+    'Home & Garden',
+    'Sports',
+    'Books',
+    'Vehicles',
+    'Collectibles',
+    'Other'
+  ]
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Filters</h3>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Category */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Category
-          </label>
-          <select
-            value={filters.category}
-            onChange={(e) => onChange({ category: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {categories.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Search */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Search
+        </label>
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={localFilters.search}
+          onChange={(e) => handleInputChange('search', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
 
-        {/* Price Range */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Price Range
-          </label>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min"
-              value={filters.minPrice}
-              onChange={(e) => onChange({ minPrice: e.target.value })}
-              className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              value={filters.maxPrice}
-              onChange={(e) => onChange({ maxPrice: e.target.value })}
-              className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+      {/* Category */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Category
+        </label>
+        <select
+          value={localFilters.category}
+          onChange={(e) => handleInputChange('category', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">All Categories</option>
+          {categories.map((category) => (
+            <option key={category} value={category.toLowerCase()}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {/* Condition */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Condition
-          </label>
-          <select
-            value={filters.condition}
-            onChange={(e) => onChange({ condition: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {conditions.map((cond) => (
-              <option key={cond.value} value={cond.value}>
-                {cond.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Location */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Location
-          </label>
+      {/* Price Range */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Price Range
+        </label>
+        <div className="flex gap-2">
           <input
-            type="text"
-            placeholder="City"
-            value={filters.city}
-            onChange={(e) => onChange({ city: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="number"
+            placeholder="Min"
+            value={localFilters.minPrice}
+            onChange={(e) => handleInputChange('minPrice', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          />
+          <input
+            type="number"
+            placeholder="Max"
+            value={localFilters.maxPrice}
+            onChange={(e) => handleInputChange('maxPrice', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+      </div>
 
-        {/* Apply Button */}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-        >
-          Apply Filters
-        </button>
+      {/* Location */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Location
+        </label>
+        <input
+          type="text"
+          placeholder="City or State"
+          value={localFilters.location}
+          onChange={(e) => handleInputChange('location', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
 
-        {/* Clear Filters */}
-        <button
-          type="button"
-          onClick={() => onChange({
+      {/* Clear Filters */}
+      <button
+        onClick={() => {
+          const emptyFilters = {
             category: '',
             minPrice: '',
             maxPrice: '',
-            condition: '',
-            city: ''
-          })}
-          className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-        >
-          Clear Filters
-        </button>
-      </form>
+            location: '',
+            search: ''
+          }
+          setLocalFilters(emptyFilters)
+          onFilterChange(emptyFilters)
+        }}
+        className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+      >
+        Clear Filters
+      </button>
     </div>
   )
 }

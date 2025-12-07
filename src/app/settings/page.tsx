@@ -111,10 +111,12 @@ export default function Settings() {
     }
   }
 
-  if (!isAuthenticated) {
-    router.push('/signup')
-    return null
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/signup')
+      return
+    }
+  }, [isAuthenticated, router])
 
   if (loading) {
     return (

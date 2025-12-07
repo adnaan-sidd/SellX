@@ -72,10 +72,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Send email notification for suspension
-    if (action === 'suspend' && updatedProduct.seller.sellerDetails?.email) {
+    if (action === 'suspend' && updatedProduct.seller.sellerDetails && typeof updatedProduct.seller.sellerDetails === 'object' && 'email' in updatedProduct.seller.sellerDetails) {
       try {
         await sendProductSuspensionEmail(
-          updatedProduct.seller.sellerDetails.email,
+          (updatedProduct.seller.sellerDetails as any).email,
           updatedProduct.seller.name || 'Seller',
           updatedProduct.title
         )

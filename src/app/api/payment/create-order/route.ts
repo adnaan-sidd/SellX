@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const orderOptions = {
       amount: amountInPaise,
       currency: 'INR',
-      receipt: `order_${Date.now()}_${session.user.id}`,
+      receipt: `ord_${Date.now().toString().slice(-6)}_${session.user.id.slice(-4)}`,
       notes: {
         userId: session.user.id,
         purpose: 'product_listing_fee'

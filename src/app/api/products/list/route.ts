@@ -1,89 +1,141 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const search = searchParams.get('search')
+
+    // Parse query parameters
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '12')
     const category = searchParams.get('category')
     const minPrice = searchParams.get('minPrice')
     const maxPrice = searchParams.get('maxPrice')
-    const condition = searchParams.get('condition')
-    const city = searchParams.get('city')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const sort = searchParams.get('sort') || 'newest'
+    const location = searchParams.get('location')
+    const search = searchParams.get('search')
 
+    // Build where clause
     const where: any = {
       status: 'ACTIVE'
     }
 
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
-      ]
-    }
-
+    // Category filter
     if (category) {
-      where.category = category
+      where.category = {
+        name: {
+          equals: category,
+          mode: 'insensitive'
+        }
+      }
     }
 
+    // Price filters
     if (minPrice || maxPrice) {
       where.price = {}
       if (minPrice) where.price.gte = parseFloat(minPrice)
       if (maxPrice) where.price.lte = parseFloat(maxPrice)
     }
 
-    if (condition) {
-      where.condition = condition
+    // Location filter
+    if (location) {
+      where.OR = [
+        { city: { contains: location, mode: 'insensitive' } },
+        { state: { contains: location, mode: 'insensitive' } }
+      ]
     }
 
-    if (city) {
-      where.city = { contains: city, mode: 'insensitive' }
+    // Search filter
+    if (search) {
+      const searchFilter = {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ]
+      }
+
+      if (where.OR) {
+        where.AND = [searchFilter]
+      } else {
+        where.OR = searchFilter.OR
+      }
     }
 
-    let orderBy: any = { createdAt: 'desc' }
-    if (sort === 'price_asc') {
-      orderBy = { price: 'asc' }
-    } else if (sort === 'price_desc') {
-      orderBy = { price: 'desc' }
-    }
+    // Calculate offset
+    const offset = (page - 1) * limit
 
-    const pageSize = limit || 20
-    const skip = limit ? 0 : (page - 1) * pageSize
+    // Get total count
+    const totalCount = await prisma.product.count({ where })
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        include: {
-          seller: {
-            select: {
-              id: true,
-              name: true,
-              phone: true,
-              // rating: true // Add later
-            }
+    // Get products
+    const products = await prisma.product.findMany({
+      where,
+      include: {
+        seller: {
+          select: {
+            id: true,
+            name: true,
+            phone: true
           }
         },
-        orderBy,
-        skip,
-        take: pageSize
-      }),
-      prisma.product.count({ where })
-    ])
+        category: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        subcategory: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      skip: offset,
+      take: limit
+    })
+
+    // Transform products for frontend
+    const transformedProducts = products.map(product => ({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      images: product.images,
+      city: product.city,
+      state: product.state,
+      createdAt: product.createdAt.toISOString(),
+      status: product.status,
+      seller: {
+        id: product.seller.id,
+        name: product.seller.name,
+        phone: product.seller.phone
+      },
+      category: product.category.name,
+      subcategory: product.subcategory?.name
+    }))
+
+    const totalPages = Math.ceil(totalCount / limit)
 
     return NextResponse.json({
-      products,
+      products: transformedProducts,
       pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize)
+        currentPage: page,
+        totalPages,
+        totalCount,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
       }
     })
+
   } catch (error) {
-    console.error('List products error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Products list error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch products' },
+      { status: 500 }
+    )
   }
 }

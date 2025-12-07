@@ -68,16 +68,17 @@ export async function POST(request: NextRequest) {
     })
 
     // Send email notification to user
-    try {
-      await sendSupportReplyEmail(
-        ticket.email,
-        ticket.user.name || 'User',
-        ticket.ticketNumber,
-        message
-      )
-    } catch (emailError) {
-      console.error('Failed to send support reply email:', emailError)
-      // Don't fail the request if email fails
+    if (ticket.email) {
+      try {
+        await sendSupportReplyEmail(
+          ticket.email,
+          ticket.ticketNumber,
+          message
+        )
+      } catch (emailError) {
+        console.error('Failed to send support reply email:', emailError)
+        // Don't fail the request if email fails
+      }
     }
 
     return NextResponse.json({

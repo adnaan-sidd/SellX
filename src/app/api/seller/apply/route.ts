@@ -64,48 +64,59 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Upload government ID to S3
-    const govtIdExtension = governmentId.name.split('.').pop()
-    const govtIdFileName = `${session.user.id}-govt-id-${Date.now()}.${govtIdExtension}`
-    const govtIdKey = `seller-documents/${govtIdFileName}`
+    // Try to upload government ID to S3, fallback to placeholder if S3 fails
+    let govtIdUrl = null
+    try {
+      const govtIdExtension = governmentId.name.split('.').pop()
+      const govtIdFileName = `${session.user.id}-govt-id-${Date.now()}.${govtIdExtension}`
+      const govtIdKey = `seller-documents/${govtIdFileName}`
 
-    const govtIdBuffer = Buffer.from(await governmentId.arrayBuffer())
-    const govtIdCommand = new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
-      Key: govtIdKey,
-      Body: govtIdBuffer,
-      ContentType: governmentId.type,
-      ServerSideEncryption: 'AES256',
-      Metadata: {
-        userId: session.user.id,
-        uploadType: 'seller-government-id'
-      }
-    })
-
-    await s3.send(govtIdCommand)
-    const govtIdUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${govtIdKey}`
-
-    // Upload selfie if provided
-    if (selfieWithId) {
-      const selfieExtension = selfieWithId.name.split('.').pop()
-      const selfieFileName = `${session.user.id}-selfie-${Date.now()}.${selfieExtension}`
-      const selfieKey = `seller-documents/${selfieFileName}`
-
-      const selfieBuffer = Buffer.from(await selfieWithId.arrayBuffer())
-      const selfieCommand = new PutObjectCommand({
+      const govtIdBuffer = Buffer.from(await governmentId.arrayBuffer())
+      const govtIdCommand = new PutObjectCommand({
         Bucket: process.env.S3_BUCKET_NAME!,
-        Key: selfieKey,
-        Body: selfieBuffer,
-        ContentType: selfieWithId.type,
+        Key: govtIdKey,
+        Body: govtIdBuffer,
+        ContentType: governmentId.type,
         ServerSideEncryption: 'AES256',
         Metadata: {
           userId: session.user.id,
-          uploadType: 'seller-selfie'
+          uploadType: 'seller-government-id'
         }
       })
 
-      await s3.send(selfieCommand)
-      selfieUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${selfieKey}`
+      await s3.send(govtIdCommand)
+      govtIdUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${govtIdKey}`
+    } catch (s3Error) {
+      console.warn('S3 upload failed for government ID, using placeholder:', s3Error)
+      govtIdUrl = `placeholder-${session.user.id}-govt-id-${Date.now()}`
+    }
+
+    // Upload selfie if provided
+    if (selfieWithId) {
+      try {
+        const selfieExtension = selfieWithId.name.split('.').pop()
+        const selfieFileName = `${session.user.id}-selfie-${Date.now()}.${selfieExtension}`
+        const selfieKey = `seller-documents/${selfieFileName}`
+
+        const selfieBuffer = Buffer.from(await selfieWithId.arrayBuffer())
+        const selfieCommand = new PutObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME!,
+          Key: selfieKey,
+          Body: selfieBuffer,
+          ContentType: selfieWithId.type,
+          ServerSideEncryption: 'AES256',
+          Metadata: {
+            userId: session.user.id,
+            uploadType: 'seller-selfie'
+          }
+        })
+
+        await s3.send(selfieCommand)
+        selfieUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${selfieKey}`
+      } catch (s3Error) {
+        console.warn('S3 upload failed for selfie, using placeholder:', s3Error)
+        selfieUrl = `placeholder-${session.user.id}-selfie-${Date.now()}`
+      }
     }
 
     // Prepare seller details

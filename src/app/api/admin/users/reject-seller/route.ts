@@ -41,9 +41,9 @@ export async function POST(request: NextRequest) {
     })
 
     // Send email notification
-    if (seller.sellerDetails?.email) {
+    if (seller.sellerDetails && typeof seller.sellerDetails === 'object' && 'email' in seller.sellerDetails) {
       try {
-        await sendSellerRejectionEmail(seller.sellerDetails.email, seller.name || 'Seller', reason)
+        await sendSellerRejectionEmail((seller.sellerDetails as any).email, seller.name || 'Seller', reason)
       } catch (emailError) {
         console.error('Failed to send rejection email:', emailError)
         // Don't fail the request if email fails

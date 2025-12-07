@@ -47,7 +47,7 @@ export async function sendEmail(
     return { success: true, messageId: result[0].headers['x-message-id'] }
   } catch (error) {
     console.error('Email sending failed:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 
@@ -306,3 +306,76 @@ export class EmailQueue {
 }
 
 export const emailQueue = new EmailQueue()
+
+// Additional email functions
+export async function sendFraudReportResolutionEmail(email: string, productTitle: string, resolution: string) {
+  const subject = `Fraud Report Resolution - ${productTitle}`
+  const html = `
+    <h2>Fraud Report Resolution</h2>
+    <p>Your fraud report for the product "${productTitle}" has been resolved.</p>
+    <p><strong>Resolution:</strong> ${resolution}</p>
+    <p>If you have any questions, please contact our support team.</p>
+  `
+
+  return await sendEmail(email, subject, html)
+}
+
+export async function sendProductSuspensionEmail(email: string, productTitle: string, reason: string) {
+  const subject = `Product Suspension Notice - ${productTitle}`
+  const html = `
+    <h2>Product Suspension Notice</h2>
+    <p>Your product "${productTitle}" has been suspended.</p>
+    <p><strong>Reason:</strong> ${reason}</p>
+    <p>Please review our terms of service and contact support if you believe this was a mistake.</p>
+  `
+
+  return await sendEmail(email, subject, html)
+}
+
+export async function sendSupportReplyEmail(email: string, ticketNumber: string, message: string) {
+  const subject = `Support Ticket Reply - ${ticketNumber}`
+  const html = `
+    <h2>Support Ticket Update</h2>
+    <p>You have received a reply to your support ticket ${ticketNumber}.</p>
+    <p><strong>Message:</strong></p>
+    <p>${message}</p>
+  `
+
+  return await sendEmail(email, subject, html)
+}
+
+export async function sendAccountSuspensionEmail(email: string, reason: string) {
+  const subject = 'Account Suspension Notice'
+  const html = `
+    <h2>Account Suspension Notice</h2>
+    <p>Your account has been suspended.</p>
+    <p><strong>Reason:</strong> ${reason}</p>
+    <p>Please contact support for more information.</p>
+  `
+
+  return await sendEmail(email, subject, html)
+}
+
+export async function sendSellerApprovalEmail(email: string, sellerName: string) {
+  const subject = 'Seller Application Approved'
+  const html = `
+    <h2>Congratulations ${sellerName}!</h2>
+    <p>Your seller application has been approved. You can now start listing products on SellX.</p>
+    <p>Welcome to our seller community!</p>
+  `
+
+  return await sendEmail(email, subject, html)
+}
+
+export async function sendSellerRejectionEmail(email: string, sellerName: string, reason: string) {
+  const subject = 'Seller Application Update'
+  const html = `
+    <h2>Seller Application Update</h2>
+    <p>Dear ${sellerName},</p>
+    <p>After reviewing your seller application, we regret to inform you that it has been rejected.</p>
+    <p><strong>Reason:</strong> ${reason}</p>
+    <p>You can reapply after addressing the issues mentioned above.</p>
+  `
+
+  return await sendEmail(email, subject, html)
+}

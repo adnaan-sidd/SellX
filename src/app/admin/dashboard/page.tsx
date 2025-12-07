@@ -204,24 +204,26 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="bg-gradient-to-r from-white via-blue-50 to-indigo-50 shadow-lg border-b border-blue-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">Monitor and manage your SellX platform</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                Admin Dashboard
+              </h1>
+              <p className="text-gray-600 text-lg">Monitor and manage your SellX platform with real-time insights</p>
             </div>
 
             <div className="flex items-center space-x-4">
               {/* Date Range Filter */}
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center space-x-3 bg-white rounded-2xl px-4 py-3 shadow-lg border border-gray-200">
+                <Filter className="w-5 h-5 text-blue-600" />
                 <select
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="bg-transparent border-none text-sm font-medium text-gray-700 focus:outline-none focus:ring-0"
                 >
                   <option value="7d">Last 7 days</option>
                   <option value="30d">Last 30 days</option>
@@ -234,19 +236,19 @@ export default function AdminDashboard() {
               <button
                 onClick={fetchDashboardData}
                 disabled={refreshing}
-                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-2xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
+                <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="font-semibold">Refresh</span>
               </button>
 
               {/* Export Button */}
               <button
                 onClick={handleExportCSV}
-                className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                className="flex items-center space-x-3 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-2xl hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
               >
-                <Download className="w-4 h-4" />
-                <span>Export CSV</span>
+                <Download className="w-5 h-5" />
+                <span className="font-semibold">Export CSV</span>
               </button>
             </div>
           </div>
@@ -257,110 +259,148 @@ export default function AdminDashboard() {
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Buyers */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-blue-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Buyers</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalBuyers || 0}</p>
-                <p className="text-sm text-green-600">
+                <p className="text-sm font-semibold text-blue-700 mb-1">Total Buyers</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-1">{stats?.totalBuyers || 0}</p>
+                <p className="text-sm text-green-600 font-medium flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-1" />
                   {stats?.verifiedBuyers || 0} verified
                 </p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Users className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Sellers */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-green-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Sellers</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalSellers || 0}</p>
+                <p className="text-sm font-semibold text-green-700 mb-1">Total Sellers</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent mb-2">{stats?.totalSellers || 0}</p>
                 <div className="text-sm space-y-1">
-                  <p className="text-yellow-600">{stats?.pendingSellers || 0} pending</p>
-                  <p className="text-green-600">{stats?.approvedSellers || 0} approved</p>
-                  <p className="text-red-600">{stats?.rejectedSellers || 0} rejected</p>
+                  <p className="text-yellow-600 font-medium flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {stats?.pendingSellers || 0} pending
+                  </p>
+                  <p className="text-green-600 font-medium flex items-center">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    {stats?.approvedSellers || 0} approved
+                  </p>
+                  <p className="text-red-600 font-medium flex items-center">
+                    <XCircle className="w-3 h-3 mr-1" />
+                    {stats?.rejectedSellers || 0} rejected
+                  </p>
                 </div>
               </div>
-              <Store className="w-8 h-8 text-green-600" />
+              <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Store className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Products */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-purple-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Products</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalProducts || 0}</p>
+                <p className="text-sm font-semibold text-purple-700 mb-1">Total Products</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">{stats?.totalProducts || 0}</p>
                 <div className="text-sm space-y-1">
-                  <p className="text-green-600">{stats?.activeProducts || 0} active</p>
-                  <p className="text-red-600">{stats?.suspendedProducts || 0} suspended</p>
+                  <p className="text-green-600 font-medium flex items-center">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    {stats?.activeProducts || 0} active
+                  </p>
+                  <p className="text-red-600 font-medium flex items-center">
+                    <XCircle className="w-3 h-3 mr-1" />
+                    {stats?.suspendedProducts || 0} suspended
+                  </p>
                 </div>
               </div>
-              <Package className="w-8 h-8 text-purple-600" />
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Package className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Revenue */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-emerald-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-3xl font-bold text-gray-900">₹{stats?.totalRevenue || 0}</p>
-                <p className="text-sm text-gray-600">From listing fees</p>
+                <p className="text-sm font-semibold text-emerald-700 mb-1">Total Revenue</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent mb-1">₹{stats?.totalRevenue || 0}</p>
+                <p className="text-sm text-gray-600 font-medium">From listing fees</p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <DollarSign className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Fraud Reports */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-red-50 to-red-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-red-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Fraud Reports</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.openFraudReports || 0}</p>
-                <p className="text-sm text-red-600">Open reports</p>
+                <p className="text-sm font-semibold text-red-700 mb-1">Fraud Reports</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-1">{stats?.openFraudReports || 0}</p>
+                <p className="text-sm text-red-600 font-medium">Open reports</p>
               </div>
-              <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div className="bg-gradient-to-br from-red-500 to-red-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <AlertTriangle className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Support Tickets */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-orange-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Support Tickets</p>
-                <p className="text-3xl font-bold text-gray-900">{(stats?.openTickets || 0) + (stats?.inProgressTickets || 0)}</p>
+                <p className="text-sm font-semibold text-orange-700 mb-1">Support Tickets</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent mb-2">{(stats?.openTickets || 0) + (stats?.inProgressTickets || 0)}</p>
                 <div className="text-sm space-y-1">
-                  <p className="text-blue-600">{stats?.openTickets || 0} open</p>
-                  <p className="text-orange-600">{stats?.inProgressTickets || 0} in progress</p>
+                  <p className="text-blue-600 font-medium flex items-center">
+                    <Eye className="w-3 h-3 mr-1" />
+                    {stats?.openTickets || 0} open
+                  </p>
+                  <p className="text-orange-600 font-medium flex items-center">
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    {stats?.inProgressTickets || 0} in progress
+                  </p>
                 </div>
               </div>
-              <MessageSquare className="w-8 h-8 text-orange-600" />
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <MessageSquare className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Today's Signups */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-indigo-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Today's Signups</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.todaySignups || 0}</p>
-                <p className="text-sm text-gray-600">New users</p>
+                <p className="text-sm font-semibold text-indigo-700 mb-1">Today's Signups</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 bg-clip-text text-transparent mb-1">{stats?.todaySignups || 0}</p>
+                <p className="text-sm text-gray-600 font-medium">New users</p>
               </div>
-              <Calendar className="w-8 h-8 text-indigo-600" />
+              <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
 
           {/* Today's Listings */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="group bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-pink-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Today's Listings</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.todayListings || 0}</p>
-                <p className="text-sm text-gray-600">New products</p>
+                <p className="text-sm font-semibold text-pink-700 mb-1">Today's Listings</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-pink-800 bg-clip-text text-transparent mb-1">{stats?.todayListings || 0}</p>
+                <p className="text-sm text-gray-600 font-medium">New products</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-cyan-600" />
+              <div className="bg-gradient-to-br from-pink-500 to-pink-600 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Package className="w-8 h-8 text-white" />
+              </div>
             </div>
           </div>
         </div>
@@ -368,40 +408,87 @@ export default function AdminDashboard() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Revenue Chart */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
+          <div className="bg-gradient-to-br from-white to-emerald-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-emerald-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Revenue Trend</h3>
+              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-2 rounded-xl shadow-lg">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={analytics?.revenue || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
-                  <Line type="monotone" dataKey="amount" stroke="#10B981" strokeWidth={2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" stroke="#6b7280" fontSize={12} />
+                  <YAxis stroke="#6b7280" fontSize={12} />
+                  <Tooltip
+                    formatter={(value) => [`₹${value}`, 'Revenue']}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#10B981"
+                    strokeWidth={3}
+                    dot={{ fill: '#10B981', strokeWidth: 2, r: 6 }}
+                    activeDot={{ r: 8, stroke: '#10B981', strokeWidth: 2, fill: 'white' }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Products by Category */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Products by Category</h3>
+          <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-blue-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Products by Category</h3>
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-lg">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics?.categories || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#3B82F6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="category" stroke="#6b7280" fontSize={12} />
+                  <YAxis stroke="#6b7280" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="url(#barGradient)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#1D4ED8" stopOpacity={0.8}/>
+                    </linearGradient>
+                  </defs>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* User Distribution */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">User Distribution</h3>
+          <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-purple-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">User Distribution</h3>
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-2 rounded-xl shadow-lg">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -411,31 +498,65 @@ export default function AdminDashboard() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent = 0 }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    outerRadius={90}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="#ffffff"
+                    strokeWidth={2}
                   >
                     {analytics?.userDistribution?.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Daily Active Users */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Active Users</h3>
+          <div className="bg-gradient-to-br from-white to-indigo-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-indigo-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 bg-clip-text text-transparent">Daily Active Users</h3>
+              <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-2 rounded-xl shadow-lg">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={analytics?.dailyActive || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="users" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.3} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" stroke="#6b7280" fontSize={12} />
+                  <YAxis stroke="#6b7280" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="users"
+                    stroke="#8B5CF6"
+                    fill="url(#areaGradient)"
+                    fillOpacity={0.6}
+                    strokeWidth={3}
+                  />
+                  <defs>
+                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.05}/>
+                    </linearGradient>
+                  </defs>
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -444,51 +565,61 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="space-y-3">
+          <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-600 to-slate-800 bg-clip-text text-transparent">Quick Actions</h3>
+              <div className="bg-gradient-to-br from-slate-500 to-slate-600 p-2 rounded-xl shadow-lg">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="space-y-4">
               <button
                 onClick={() => router.push('/admin/sellers')}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                className="w-full group bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-2xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform flex items-center justify-center space-x-3"
               >
-                <Users className="w-5 h-5" />
+                <Users className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 <span>Review Seller Applications</span>
               </button>
 
               <button
                 onClick={() => router.push('/admin/fraud-reports')}
-                className="w-full bg-red-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+                className="w-full group bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-4 rounded-2xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform flex items-center justify-center space-x-3"
               >
-                <AlertTriangle className="w-5 h-5" />
+                <AlertTriangle className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 <span>View Fraud Reports</span>
               </button>
 
               <button
                 onClick={() => router.push('/admin/support')}
-                className="w-full bg-orange-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2"
+                className="w-full group bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-4 rounded-2xl font-semibold hover:from-orange-700 hover:to-orange-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform flex items-center justify-center space-x-3"
               >
-                <MessageSquare className="w-5 h-5" />
+                <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 <span>Pending Tickets</span>
               </button>
             </div>
           </div>
 
           {/* Recent Activity */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+          <div className="lg:col-span-2 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 bg-clip-text text-transparent">Recent Activity</h3>
+              <div className="bg-gradient-to-br from-gray-500 to-gray-600 p-2 rounded-xl shadow-lg">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                  <div className="flex-shrink-0 mt-1">
+                <div key={activity.id} className="group flex items-start space-x-4 p-4 rounded-2xl hover:bg-white hover:shadow-md transition-all duration-300 border border-gray-100">
+                  <div className="flex-shrink-0 mt-1 p-2 bg-gray-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
                     {getActivityIcon(activity.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-base font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">{activity.title}</p>
                       {getStatusBadge(activity.status)}
                     </div>
-                    <p className="text-sm text-gray-600">{activity.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-sm text-gray-600 leading-relaxed mb-2">{activity.description}</p>
+                    <p className="text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full inline-block">
                       {new Date(activity.timestamp).toLocaleString()}
                     </p>
                   </div>
@@ -496,9 +627,12 @@ export default function AdminDashboard() {
               ))}
 
               {recentActivity.length === 0 && (
-                <div className="text-center py-8">
-                  <Eye className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No recent activity</p>
+                <div className="text-center py-12">
+                  <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-4 rounded-2xl inline-block mb-4">
+                    <Eye className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 font-medium">No recent activity</p>
+                  <p className="text-sm text-gray-500 mt-1">Activity will appear here as users interact with the platform</p>
                 </div>
               )}
             </div>

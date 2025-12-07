@@ -26,7 +26,6 @@ export async function PUT(request: NextRequest) {
         email: email?.trim() || null,
         city: city?.trim() || null,
         state: state?.trim() || null,
-        bio: bio?.trim() || null,
         profilePhoto: profilePhoto?.trim() || null
       },
       select: {
@@ -37,7 +36,6 @@ export async function PUT(request: NextRequest) {
         profilePhoto: true,
         city: true,
         state: true,
-        bio: true,
         role: true,
         isVerified: true,
         buyerIdUrl: true,

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Check if product exists
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      select: { id: true, status: true }
+      select: { id: true, status: true, sellerId: true }
     })
 
     if (!product) {
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Decrypt messages for the user
-    const rawMessages = chat.messages ? JSON.parse(chat.messages) : []
+    const rawMessages = Array.isArray(chat.messages) ? chat.messages : []
     const decryptedMessages = rawMessages.map((msg: any) => ({
       ...msg,
       message: msg.message ? decryptMessage(msg.message) : ''

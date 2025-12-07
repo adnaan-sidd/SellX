@@ -41,9 +41,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Send email notification
-    if (seller.sellerDetails?.email) {
+    const sellerDetails = seller.sellerDetails as { email?: string } | null
+    if (sellerDetails?.email) {
       try {
-        await sendSellerRejectionEmail(seller.sellerDetails.email, seller.name || 'Seller', reason)
+        await sendSellerRejectionEmail(sellerDetails.email, seller.name || 'Seller', reason)
       } catch (emailError) {
         console.error('Failed to send rejection email:', emailError)
         // Don't fail the request if email fails

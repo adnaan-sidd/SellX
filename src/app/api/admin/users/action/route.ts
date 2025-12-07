@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { action, userId, userType } = await request.json()
+    const { action, userId, userType, reason } = await request.json()
 
     if (!action || !userId || !userType) {
       return NextResponse.json({ error: 'Action, userId, and userType are required' }, { status: 400 })
@@ -69,15 +69,17 @@ export async function POST(request: NextRequest) {
 
     // Send email notification for suspension
     if (action === 'suspend') {
+      const sellerDetails = updatedUser.sellerDetails as { email?: string } | null
       const email = userType === 'seller'
-        ? updatedUser.sellerDetails?.email
+        ? sellerDetails?.email
         : null // Buyers don't have email in sellerDetails
 
       if (email) {
         try {
           await sendAccountSuspensionEmail(
             email,
-            updatedUser.name || 'User'
+            updatedUser.name || 'User',
+            reason || 'Violation of platform policies'
           )
         } catch (emailError) {
           console.error('Failed to send suspension email:', emailError)

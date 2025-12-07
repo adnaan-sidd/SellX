@@ -1,10 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 
-export default function VerifyOTP() {
+// Force dynamic rendering to avoid SSR issues with useSearchParams
+export const dynamic = 'force-dynamic'
+
+function VerifyOTPContent() {
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -113,5 +116,13 @@ export default function VerifyOTP() {
         {message && <p className="mt-4 text-center text-sm">{message}</p>}
       </div>
     </div>
+  )
+}
+
+export default function VerifyOTP() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-gray-600">Loading...</div></div>}>
+      <VerifyOTPContent />
+    </Suspense>
   )
 }

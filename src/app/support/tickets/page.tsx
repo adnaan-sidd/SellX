@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import {
@@ -17,6 +17,9 @@ import {
   Filter
 } from "lucide-react"
 
+// Force dynamic rendering to avoid SSR issues with useSearchParams
+export const dynamic = 'force-dynamic'
+
 interface SupportTicket {
   id: string
   ticketNumber: string
@@ -29,7 +32,7 @@ interface SupportTicket {
   replies?: any[]
 }
 
-export default function SupportTickets() {
+function SupportTicketsContent() {
   const { user, isAuthenticated } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -335,5 +338,13 @@ export default function SupportTickets() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SupportTickets() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-gray-600">Loading...</div></div>}>
+      <SupportTicketsContent />
+    </Suspense>
   )
 }
